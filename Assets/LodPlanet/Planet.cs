@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class Planet : MonoBehaviour
 {
-    [Range(2,256)]
+    [Range(2, 256)]
     public int resolution = 10;
 
     public bool autoUpdate = true;
-    public enum FaceRenderMask { All,Top,Bottom,Left,Right,Front,Back}
-    public FaceRenderMask faceRenderMask= FaceRenderMask.All;
+    public enum FaceRenderMask { All, Top, Bottom, Left, Right, Front, Back }
+    public FaceRenderMask faceRenderMask = FaceRenderMask.All;
+
+    private Material material;
 
 
     [HideInInspector]
@@ -21,12 +23,31 @@ public class Planet : MonoBehaviour
     public ColourSettings colourSettings;
 
 
-    ShapeGenerator shapeGenerator=new ShapeGenerator();
-    ColourGenerator colourGenerator=new ColourGenerator();
+    ShapeGenerator shapeGenerator = new ShapeGenerator();
+    ColourGenerator colourGenerator = new ColourGenerator();
 
-    [SerializeField,HideInInspector]
+    [SerializeField, HideInInspector]
     MeshFilter[] meshFilters;
     TerrainFace[] terrainFaces;
+
+    #region LOD
+    public static Transform player;
+    public static float size = 10;
+
+    public static Dictionary<int, float> detailLevelDistances = new Dictionary<int, float>(){
+        { 0,Mathf.Infinity },
+        { 1,60f },
+        { 2,25f },
+        { 3,10f },
+        { 4,4f },
+        { 5,1.5f },
+        { 6,0.7f },
+        { 7,0.3f },
+        { 8,0.1f }
+    };
+
+#endregion
+
 
 
     void Initialize()
@@ -50,7 +71,11 @@ public class Planet : MonoBehaviour
                 meshFilters[i].sharedMesh = new Mesh();
 
             }
-            meshFilters[i].GetComponent<MeshRenderer>().sharedMaterial = colourSettings.planetMaterial;
+            if (material == null)
+            {
+                material=new Material(colourSettings.planetMaterial);
+            }
+            meshFilters[i].GetComponent<MeshRenderer>().sharedMaterial = material;
            terrainFaces[i] = new TerrainFace(shapeGenerator,meshFilters[i].sharedMesh, resolution, directions[i]);
             bool renderFace = faceRenderMask == FaceRenderMask.All || (int)faceRenderMask - 1 == i;
             meshFilters[i].gameObject.SetActive(renderFace);
