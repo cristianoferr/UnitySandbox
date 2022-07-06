@@ -31,7 +31,7 @@ public class RidgidNoiseFilter : INoiseFilter
 
         }
         //(noise.Evaluate(point* settings.roughness+settings.centre) +1)*.5f;
-        noiseValue = Mathf.Max(0, noiseValue - settings.minValue);
+        noiseValue = noiseValue - settings.minValue;
         return noiseValue * settings.strength;
 
     }
